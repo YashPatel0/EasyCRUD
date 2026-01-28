@@ -8,6 +8,11 @@ services:
       - "my-vol123:/var/lib/mysql"
     ports:
       - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mariadb-admin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   backend:
     build: ./backend
@@ -19,7 +24,9 @@ services:
       DB_PASSWORD: "redhat"
       DB_HOST: "database"
     depends_on:
-      - database
+      database:
+        condition: service_healthy
+    restart: always
 
   frontend:
     build: ./frontend
